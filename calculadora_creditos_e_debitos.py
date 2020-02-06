@@ -18,17 +18,18 @@ def print_menu():
 	print("1. Trocar nome")
 	print("2. Quanto devo para cada um?")
 	print("3. Quem e quanto me devem?")
-	print("4. Atualizar DataFrame")
+	print("4. Pagar alguém")
+	print("5. Atualizar DataFrame")
 	print("\n0. Sair")
 	option = to_int(input("\nEscolha uma opção: "))
-	while option not in range(5):
+	while option not in range(6):
 		print(f"{Fore.RED}ERRO - Esse opção não é válida. Tente novamente.{Style.RESET_ALL}")
 		option = to_int(input("\nEscolha uma opção: "))
 	clear_screen()
 	return option
 
-def set_name():
-	name = input("Digite o seu primeiro nome: ").capitalize()
+def set_name(mes="Digite o seu primeiro nome"):
+	name = input(mes + ": ").capitalize()
 	while name not in NAMES:
 		print(f"{Fore.RED}ERRO - Esse nome não está cadastrado. Tente novamente.{Style.RESET_ALL}")
 		name = input("Digite o seu primeiro nome: ").capitalize()
@@ -45,7 +46,7 @@ def get_data(d):
 	return d
 
 def print_cols():
-	for col in list(df)[:12]:
+	for col in list(gastos)[:12]:
 		if len(col) < 8:
 			print(col[:15], end="\t\t")
 		else:
@@ -62,13 +63,13 @@ def print_row(row):
 	print()
 
 def print_rows_that_you_used():
-	for index, row in df.iterrows():
+	for index, row in gastos.iterrows():
 		if not pd.isna(row[NAME]):
 			print_row(row)
 
 def calculate_debits_per_person():
 	debits = [0]*len(NAMES)
-	for index, row in df.iterrows():
+	for index, row in gastos.iterrows():
 		if row[NAME] == 1:
 			idx = NAMES.index(row["Quem pagou"])
 			debits[idx] += float(row["Preço por pessoa"].split()[-1].replace(",", "."))
@@ -99,13 +100,13 @@ def debits():
 	input("\n\nPress ENTER to return to menu")
 
 def print_rows_that_you_paid():
-	for index, row in df.iterrows():
+	for index, row in gastos.iterrows():
 		if row["Quem pagou"] == NAME:
 			print_row(row)
 
 def calculate_credits_per_person():
 	credits = [0]*len(NAMES)
-	for index, row in df.iterrows():
+	for index, row in gastos.iterrows():
 		if row["Quem pagou"] == NAME:
 			for idx, name in enumerate(NAMES):
 				if row[name] == 1:
@@ -136,8 +137,30 @@ def credits():
 
 	input("\n\nPress ENTER to return to menu")
 
-def update_df():
-	return pd.read_csv("https://docs.google.com/spreadsheets/d/1dCYfYqVfgioZQ5YXxrmSPXuiudIbfHvW4jj9tQQBq20/export?gid=0&format=csv")
+def pay():
+	receiver = set_name("Digite o nome de quem você quer pagar")
+	idx = NAMES.index(receiver)
+	credits = calculate_credits_per_person()
+	debits = calculate_debits_per_person()
+	if credits[idx]-debits[idx] >= 0:
+		print(f"Que maravilha, {NAME}! Você não deve nada para {receiver}.")
+	else:
+		debit = debits[idx]-credits[idx]
+		print(f"Pelos nossos calculos, você deve R${'%.2f' % debit} para {receiver}.\n")
+		print("Para pagar, basta enviar esse valor para a conta abaixo:")
+		for index, row in dados_bancarios.iterrows():
+			if len(row["Dado"]) < 7:
+				print(row["Dado"] + ": \t\t" + str(row[receiver]))
+			else:
+				print(row["Dado"] + ": \t" + str(row[receiver]))
+	input("\n\nPress ENTER to return to menu")
+	
+
+def update_gastos():
+	gastos = pd.read_csv("https://docs.google.com/spreadsheets/d/1dCYfYqVfgioZQ5YXxrmSPXuiudIbfHvW4jj9tQQBq20/export?gid=0&format=csv")
+	dados_bancarios = pd.read_csv("https://docs.google.com/spreadsheets/d/1dCYfYqVfgioZQ5YXxrmSPXuiudIbfHvW4jj9tQQBq20/export?gid=1968442958&format=csv")
+	return gastos, dados_bancarios
+
 clear_screen()
 
 print(" ___________________________________________________")
@@ -158,7 +181,7 @@ input("Press ENTER to continue")
 
 clear_screen()
 
-df = update_df()
+gastos, dados_bancarios = update_gastos()
 NAMES = ["Breno", "Bruno", "Caio", "Emanuel", "Henrique", "Pedro", "Rafael"]
 
 NAME = set_name()
@@ -173,6 +196,8 @@ while option:
 	elif option == 3:
 		credits()
 	elif option == 4:
-		df = update_df()
+		pay()
+	elif option == 5:
+		gastos, dados_bancarios = update_gastos()
 	clear_screen()
 	option = print_menu()
