@@ -1,2 +1,16 @@
-# split-bills
-Python script to help split bills based on a Google Sheet
+# Split Bills
+
+## How to use
+First, clone the repository:
+```
+git clone https://github.com/brenopoggiali/split-bills.git
+```
+Then, run:
+```
+bash run
+```
+or
+```
+pip3 install -r requirements.txt
+python3 calculadora_creditos_e_debitos.py
+```
