@@ -170,9 +170,10 @@ def roda_de_gastos():
 		all_debits.append([sum(diff), NAME])
 
 	all_debits = sorted(all_debits)[::-1]
-	for i in range(len(all_debits)-1):
-		print(f"{all_debits[i][1]} paga R${'%.2f' % all_debits[i][0]} ao {all_debits[i+1][1]}")
-		all_debits[i+1][0] += all_debits[i][0]
+	while(len(all_debits) > 1):
+		print(f"{all_debits[0][1]} paga R${'%.2f' % all_debits[0][0]} ao {all_debits[-1][1]}")
+		all_debits[-1][0] += all_debits[0][0]
+		all_debits = sorted(all_debits[1:])[::-1]
 	
 	input("\n\nPress ENTER to return to menu")
 	NAME = old_name
