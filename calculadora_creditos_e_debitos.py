@@ -23,7 +23,7 @@ def print_menu():
 	print("6. Atualizar DataFrame")
 	print("\n0. Sair")
 	option = to_int(input("\nEscolha uma opção: "))
-	while option not in range(6):
+	while option not in range(7):
 		print(f"{Fore.RED}ERRO - Esse opção não é válida. Tente novamente.{Style.RESET_ALL}")
 		option = to_int(input("\nEscolha uma opção: "))
 	clear_screen()
