@@ -19,7 +19,8 @@ def print_menu():
 	print("2. Quanto devo para cada um?")
 	print("3. Quem e quanto me devem?")
 	print("4. Pagar alguém")
-	print("5. Atualizar DataFrame")
+	print("5. Roda de pagamento")
+	print("6. Atualizar DataFrame")
 	print("\n0. Sair")
 	option = to_int(input("\nEscolha uma opção: "))
 	while option not in range(6):
@@ -154,7 +155,27 @@ def pay():
 			else:
 				print(row["Dado"] + ": \t" + str(row[receiver]))
 	input("\n\nPress ENTER to return to menu")
+
+def roda_de_gastos():
+	global NAME
+	old_name = NAME
+	all_debits = []
+	for name in NAMES:
+		NAME = name
+		credits = calculate_credits_per_person()
+		debits = calculate_debits_per_person()
+		diff = []
+		for i in range(len(credits)):
+			diff.append(debits[i]-credits[i])
+		all_debits.append([sum(diff), NAME])
+
+	all_debits = sorted(all_debits)[::-1]
+	for i in range(len(all_debits)-1):
+		print(f"{all_debits[i][1]} paga R${'%.2f' % all_debits[i][0]} ao {all_debits[i+1][1]}")
+		all_debits[i+1][0] += all_debits[i][0]
 	
+	input("\n\nPress ENTER to return to menu")
+	NAME = old_name
 
 def update_gastos():
 	gastos = pd.read_csv("https://docs.google.com/spreadsheets/d/1dCYfYqVfgioZQ5YXxrmSPXuiudIbfHvW4jj9tQQBq20/export?gid=0&format=csv")
@@ -198,6 +219,8 @@ while option:
 	elif option == 4:
 		pay()
 	elif option == 5:
+		roda_de_gastos()
+	elif option == 6:
 		gastos, dados_bancarios = update_gastos()
 	clear_screen()
 	option = print_menu()
